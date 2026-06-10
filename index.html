@@ -262,6 +262,7 @@
 
     <!-- 체스 프로그램 로직 -->
     <script>
+        // 안전한 Lucide 아이콘 호출을 위한 전역 유틸리티 함수
         function safeCreateIcons() {
             try {
                 if (typeof lucide !== 'undefined' && lucide.createIcons) {
@@ -273,12 +274,10 @@
         }
 
         // --- 1. 크롬북/모바일 완벽 대응용 고정밀 SVG 벡터 렌더러 ---
-        // 어떠한 시스템 OS의 폰트 에뮬레이션이나 이모지 강제 변환 버그에도 구애받지 않고 항상 깨끗한 고품질 벡터 그래픽을 그립니다.
         function getPieceSVG(type, color) {
             const fillColor = color === 'w' ? '#f8fafc' : '#1e293b';
             const strokeColor = color === 'w' ? '#0f172a' : '#f1f5f9';
             
-            // Wikipedia 표준 인터내셔널 체스 조형 기반의 정교하고 압축된 SVG 패스
             switch(type) {
                 case 'p': // 폰 (Pawn)
                     return `<svg class="w-full h-full" viewBox="0 0 45 45" xmlns="http://www.w3.org/2000/svg">
@@ -1085,6 +1084,15 @@
                 document.getElementById('btn-close-settings').addEventListener('click', () => this.closeDrawers());
                 document.getElementById('btn-close-pgn').addEventListener('click', () => this.closeDrawers());
                 this.drawerOverlay.addEventListener('click', () => this.closeDrawers());
+
+                // 버그 수정: 게임 종료 팝업 모달 내부 버튼 이벤트 정밀 연결
+                document.getElementById('modal-btn-restart').addEventListener('click', () => {
+                    this.hideGameOverModal();
+                    this.startNewGame();
+                });
+                document.getElementById('modal-btn-close').addEventListener('click', () => {
+                    this.hideGameOverModal();
+                });
             }
 
             // 모바일 드로어 서랍 열기
@@ -1465,10 +1473,12 @@
             showGameOverModal(title, desc) {
                 this.modalTitle.innerText = title;
                 this.modalDesc.innerText = desc;
+                // 모달 표시 전환
                 this.gameOverModal.classList.remove('hidden');
             }
 
             hideGameOverModal() {
+                // 모달 가시성 제거
                 this.gameOverModal.classList.add('hidden');
             }
 
